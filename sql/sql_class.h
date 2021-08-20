@@ -3332,7 +3332,7 @@ public:
     awake_no_mutex(state_to_set);
     mysql_mutex_unlock(&LOCK_thd_kill);
   }
- 
+
   /** Disconnect the associated communication endpoint. */
   void disconnect();
 

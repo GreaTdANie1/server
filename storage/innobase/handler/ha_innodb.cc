@@ -19100,9 +19100,9 @@ static void wsrep_abort_transaction(
 		wsrep_thd_kill_LOCK(victim_thd);
 		wsrep_thd_LOCK(victim_thd);
 		wsrep_thd_set_conflict_state(victim_thd, MUST_ABORT);
+		wsrep_thd_kill_UNLOCK(victim_thd);
 		wsrep_thd_UNLOCK(victim_thd);
 		wsrep_thd_awake(victim_thd, signal);
-		wsrep_thd_kill_UNLOCK(victim_thd);
 	}
 
 	DBUG_VOID_RETURN;
