@@ -54,15 +54,11 @@ INSERT INTO parent VALUES (1, 0);
 --connection node_2a
 --reap
 
---connection node_1
-SET SESSION wsrep_sync_wait=15;
-SELECT COUNT(*) FROM parent;
-SELECT COUNT(*) FROM child;
-
---connection node_2
-SET SESSION wsrep_sync_wait=15;
-SELECT COUNT(*) FROM parent;
-SELECT COUNT(*) FROM child;
+#
+# ALTER TABLE could bf kill one or more of INSERTs to parent, so
+# actual number of rows in PARENT is dependent does INSERT commit
+# or not before ALTER TABLE is executed
+#
 
 DROP TABLE child;
 DROP TABLE parent;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2013 Codership Oy <info@codership.com>
+/* Copyright (C) 2013-2021 Codership Oy <info@codership.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -804,9 +804,11 @@ my_bool wsrep_thd_is_local(void *thd_ptr, my_bool sync)
 
 int wsrep_abort_thd(void *bf_thd_ptr, void *victim_thd_ptr, my_bool signal)
 {
-  THD *victim_thd = (THD *) victim_thd_ptr;
-  THD *bf_thd     = (THD *) bf_thd_ptr;
+  THD *victim_thd= (THD *) victim_thd_ptr;
+  THD *bf_thd= (THD *) bf_thd_ptr;
   DBUG_ENTER("wsrep_abort_thd");
+
+  mysql_mutex_assert_owner(&victim_thd->LOCK_thd_data);
 
   if ( (WSREP(bf_thd) ||
          ( (WSREP_ON || bf_thd->variables.wsrep_OSU_method == WSREP_OSU_RSU) &&
@@ -834,6 +836,18 @@ int wsrep_abort_thd(void *bf_thd_ptr, void *victim_thd_ptr, my_bool signal)
   }
 
   DBUG_RETURN(1);
+}
+
+/* This is wrapper for wsrep_break_lock in thr_lock.c */
+int wsrep_thr_abort_thd(void *bf_thd_ptr, void *victim_thd_ptr, my_bool signal)
+{
+  THD* victim_thd= (THD *) victim_thd_ptr;
+  /* We need to lock THD::LOCK_thd_data to protect victim
+  from concurrent usage or disconnect or delete. */
+  mysql_mutex_lock(&victim_thd->LOCK_thd_data);
+  int res= wsrep_abort_thd(bf_thd_ptr, victim_thd_ptr, signal);
+  mysql_mutex_unlock(&victim_thd->LOCK_thd_data);
+  return res;
 }
 
 extern "C"

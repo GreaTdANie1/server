@@ -32,6 +32,8 @@ void wsrep_create_rollbacker();
 
 int  wsrep_abort_thd(void *bf_thd_ptr, void *victim_thd_ptr,
                                 my_bool signal);
+/* This is just wrapper for thr lock */
+int wsrep_thr_abort_thd(void * bf_thd, void *victim_thd, my_bool signal);
 
 /*
   PA = Parallel Applying (on the slave side)
