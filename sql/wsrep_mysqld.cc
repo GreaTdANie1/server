@@ -2008,10 +2008,10 @@ static int wsrep_TOI_begin(THD *thd, const char *db, const char *table,
 {
   DBUG_ASSERT(thd->variables.wsrep_OSU_method == WSREP_OSU_TOI);
 
-  WSREP_DEBUG("TOI Begin for %s", wsrep_thd_query(thd));
+  WSREP_INFO("TOI Begin for %s", wsrep_thd_query(thd));
   if (wsrep_can_run_in_toi(thd, db, table, table_list) == false)
   {
-    WSREP_DEBUG("No TOI for %s", wsrep_thd_query(thd));
+    WSREP_INFO("No TOI for %s", wsrep_thd_query(thd));
     return 1;
   }
 
@@ -2162,10 +2162,15 @@ int wsrep_to_isolation_begin(THD *thd, const char *db_, const char *table_,
                              const TABLE_LIST* table_list,
                              Alter_info* alter_info, wsrep::key_array* fk_tables)
 {
+  WSREP_INFO("wsrep_to_isolation_begin for %s", wsrep_thd_query(thd));
   /*
     No isolation for applier or replaying threads.
    */
-  if (!wsrep_thd_is_local(thd)) return 0;
+  if (!wsrep_thd_is_local(thd))
+  {
+    WSREP_INFO("wsrep_to_isolation_begin not local for %s", wsrep_thd_query(thd));
+    return 0;
+  }
 
   int ret= 0;
   mysql_mutex_lock(&thd->LOCK_thd_data);

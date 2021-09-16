@@ -418,17 +418,20 @@ bool Sql_cmd_truncate_table::truncate_table(THD *thd, TABLE_LIST *table_ref)
 #ifdef WITH_WSREP
     if (WSREP(thd) && wsrep_thd_is_local(thd))
     {
+      WSREP_DEBUG("TRUNCATE STARTS FOR %s", wsrep_thd_query(thd));
       wsrep::key_array keys;
       /* Do not start TOI if table is not found */
       if (!wsrep_append_fk_parent_table(thd, table_ref, &keys))
       {
         if (keys.empty())
         {
+	  WSREP_INFO("TRUNCATE keys empty for %s", wsrep_thd_query(thd));
           WSREP_TO_ISOLATION_BEGIN_IF(table_ref->db.str, table_ref->table_name.str, NULL)
           {
             DBUG_RETURN(TRUE);
           }
         } else {
+	  WSREP_INFO("TRUNCATE for %s", wsrep_thd_query(thd));
           WSREP_TO_ISOLATION_BEGIN_FK_TABLES(NULL, NULL, table_ref, &keys)
           {
             DBUG_RETURN(TRUE);
